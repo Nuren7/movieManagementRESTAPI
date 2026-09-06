@@ -7,7 +7,6 @@ const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   //Check if user already exist
-
   const userExists = await prisma.user.findUnique({
     where: { email: email },
   });
@@ -26,7 +25,7 @@ const register = async (req, res) => {
   const user = await prisma.user.create({
     data: { name, email, password: hashedPassword },
   });
-  const token = generateToken(user.id);
+  const token = generateToken(user.id, res);
 
   res.status(201).json({
     status: "Success",
@@ -62,7 +61,7 @@ const login = async (req, res) => {
   }
 
   //Generate JWT token
-  const token = generateToken(user.id);
+  const token = generateToken(user.id, res);
 
   res.status(201).json({
     status: "Success",
@@ -76,4 +75,16 @@ const login = async (req, res) => {
   });
 };
 
-export { register, login };
+//LOGOUT
+const logout = async (req, res) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    status: "Success",
+    message: "Logged out successfully",
+  });
+};
+
+export { register, login, logout };
